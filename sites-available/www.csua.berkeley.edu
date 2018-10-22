@@ -1,29 +1,62 @@
 # Nginx config for CSUA
 server {
-	listen 9080;
-	listen [::]:9080;
-
-	listen 9443 ssl;
-	listen [::]:9443 ssl;
-
+	listen 80;
+	listen 443 ssl;
 	server_name www.csua.berkeley.edu;
-
-	root /var/www/html;
-	root /webserver/static-website/_site/
-	index index.html;
 	location / {
-		# First attempt to serve request as file, then
-		# as directory, then fall back to displaying a 404.
-		try_files $uri $uri/ =404;
+		proxy_redirect off;
+		proxy_pass http://csua_website;
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection 'upgrade';
+		proxy_set_header Host $host;
+		proxy_cache_bypass $http_upgrade;
 	}
 	location ~ ^/~(.+?)(/.*)?$ {
 		alias /home/$1/public_html$2;
 		autoindex on;
 	}
-
+	location /media/ {
+		alias /webserver/CSUA-backend/media_root/;
+	}
+	location /static/ {
+		alias /webserver/csua-website/public/static/;
+	}
 	ssl_certificate /root/CERTS/acme.sh/csua.berkeley.edu/fullchain.cer;
 	ssl_certificate_key /root/CERTS/acme.sh/csua.berkeley.edu/csua.berkeley.edu.key;
 	if ($scheme != "https") {
-		return 301 https://$host:9443$request_uri;
+		return 301 https://$host$request_uri;
 	}
+}
+
+server {
+	listen 8080 ssl ;
+	listen [::]:8080 ssl ;
+	server_name www.csua.berkeley.edu;
+	location / {
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header Host $http_host;
+		proxy_redirect off;
+		proxy_pass http://csua_backend;
+	}
+	location /media/ {
+		alias /webserver/CSUA-backend/media_root/;
+	}
+	location /static/ {
+		alias /webserver/CSUA-backend/static_root/;
+	}
+	ssl_certificate /root/CERTS/acme.sh/csua.berkeley.edu/fullchain.cer;
+	ssl_certificate_key /root/CERTS/acme.sh/csua.berkeley.edu/csua.berkeley.edu.key;
+	if ($scheme != "https") {
+		return 301 https://$host$request_uri;
+	}
+}
+
+upstream csua_backend {
+	server localhost:3001 fail_timeout=0;
+}
+
+upstream csua_website {
+	server localhost:3000;
 }
