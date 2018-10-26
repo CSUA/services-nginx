@@ -1,0 +1,37 @@
+# Nginx config for CSUA
+server {
+	listen 80;
+	listen 443 ssl;
+	server_name dev.csua.berkeley.edu;
+	location / {
+		proxy_pass http://csua_backend_dev;
+		proxy_http_version 1.1;
+
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection 'upgrade';
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+
+		proxy_cache_bypass $http_upgrade;
+
+		# proxy_redirect default;
+		proxy_redirect https://www.csua.berkeley.edu https://dev.csua.berkeley.edu;
+	}
+	location /media/ {
+		alias /webserver/CSUA-backend/media_root/;
+	}
+	location /static/ {
+		alias /webserver/CSUA-backend-dev/static_root/;
+	}
+	ssl_certificate /root/CERTS/acme.sh/csua.berkeley.edu/fullchain.cer;
+	ssl_certificate_key /root/CERTS/acme.sh/csua.berkeley.edu/csua.berkeley.edu.key;
+	if ($scheme != "https") {
+		return 301 https://$host$request_uri;
+	}
+}
+
+upstream csua_backend_dev {
+	server localhost:3002 fail_timeout=0;
+}

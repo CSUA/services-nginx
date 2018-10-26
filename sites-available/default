@@ -1,0 +1,7 @@
+server {
+	listen 80 default_server;
+	listen 443 ssl default_server;
+	ssl_certificate /root/CERTS/acme.sh/csua.berkeley.edu/fullchain.cer;
+	ssl_certificate_key /root/CERTS/acme.sh/csua.berkeley.edu/csua.berkeley.edu.key;
+	return 444;
+}
