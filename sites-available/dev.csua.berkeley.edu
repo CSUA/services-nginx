@@ -16,8 +16,7 @@ server {
 
 		proxy_cache_bypass $http_upgrade;
 
-		# proxy_redirect default;
-		proxy_redirect https://www.csua.berkeley.edu https://dev.csua.berkeley.edu;
+		proxy_redirect off;
 	}
 	location /media/ {
 		alias /webserver/CSUA-backend/media_root/;
