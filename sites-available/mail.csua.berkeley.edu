@@ -1,0 +1,37 @@
+server {
+	listen 80;
+	listen [::]:80;
+	server_name mail.csua.berkeley.edu;
+	return 301 https://$host$uri;
+}
+
+server {
+	listen 443 ssl ;
+	listen [::]:443 ssl ;
+	server_name mail.csua.berkeley.edu;
+
+	root /usr/lib/cgi-bin/mailman;
+
+	location = / {
+		rewrite ^ /listinfo;
+	}
+	location / {
+		fastcgi_split_path_info ^(/[^/]*)(.*)$;
+		fastcgi_pass unix:/run/fcgiwrap.socket;
+		include fastcgi.conf;
+		fastcgi_param PATH_INFO         $fastcgi_path_info;
+		fastcgi_param PATH_TRANSLATED   $document_root$fastcgi_path_info;
+	}
+	location /icons {
+		alias /usr/lib/mailman/icons;
+	}
+	location /pipermail {
+		alias /var/lib/mailman/archives/public;
+	}
+	location /images/mailman {
+		alias /usr/share/images/mailman;
+	}
+
+	ssl_certificate /root/CERTS/acme.sh/csua.berkeley.edu/fullchain.cer;
+	ssl_certificate_key /root/CERTS/acme.sh/csua.berkeley.edu/csua.berkeley.edu.key;
+}
