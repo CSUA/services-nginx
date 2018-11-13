@@ -2,21 +2,14 @@
 server {
 	listen 80;
 	server_name www.csua.berkeley.edu;
-	return 301 https://$host$request_uri;
+	return 301 https://www.csua.berkeley.edu$request_uri;
 	access_log off;
 }
 server {
 	listen 443 ssl;
 	server_name www.csua.berkeley.edu;
-	location / {
-		proxy_redirect https://www.csua.berkeley.edu:3000/ https://www.csua.berkeley:8080/;
-		proxy_pass http://csua_website;
-		proxy_http_version 1.1;
-		proxy_set_header Upgrade $http_upgrade;
-		proxy_set_header Connection 'upgrade';
-		proxy_set_header Host $host;
-		proxy_cache_bypass $http_upgrade;
-	}
+	root /var/www/static-website;
+
 	location ~ ^/~(.+?)(/.*)?$ {
 		alias /home/$1/public_html$2;
 		autoindex on;
@@ -39,13 +32,10 @@ server {
 }
 
 server {
-	listen 8080 ssl ;
-	listen [::]:8080 ssl ;
+	listen 8080 ssl;
 	server_name www.csua.berkeley.edu;
 	location / {
-		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-		proxy_set_header X-Forwarded-Proto $scheme;
-		proxy_set_header Host $http_host;
+		include proxy_params;
 		proxy_redirect off;
 		proxy_pass http://csua_backend;
 	}
@@ -55,12 +45,15 @@ server {
 	location /static/ {
 		alias /webserver/CSUA-backend/static_root/;
 	}
+	location /favicon.ico {
+		alias /webserver/CSUA-backend/static_root/;
+	}
 	ssl_certificate /root/CERTS/acme.sh/csua.berkeley.edu/fullchain.cer;
 	ssl_certificate_key /root/CERTS/acme.sh/csua.berkeley.edu/csua.berkeley.edu.key;
 }
 
 upstream csua_backend {
-	server localhost:3001 fail_timeout=0;
+	server localhost:3001;
 }
 
 upstream csua_website {
