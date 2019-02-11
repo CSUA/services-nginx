@@ -1,11 +1,6 @@
 server {
 	listen 80;
 	listen [::]:80;
-	server_name mail.csua.berkeley.edu;
-	return 301 https://$host$uri;
-}
-
-server {
 	listen 443 ssl ;
 	listen [::]:443 ssl ;
 	server_name mail.csua.berkeley.edu;
@@ -13,6 +8,9 @@ server {
 	root /usr/lib/cgi-bin/mailman;
 
 	location = / {
+		rewrite ^ /listinfo;
+	}
+	location = /mailman/listinfo {
 		rewrite ^ /listinfo;
 	}
 	location / {

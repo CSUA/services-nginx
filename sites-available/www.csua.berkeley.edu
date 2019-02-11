@@ -8,8 +8,14 @@ server {
 server {
 	listen 443 ssl;
 	server_name www.csua.berkeley.edu;
-	root /var/www/static-website;
+	error_page 404 /404.html;
 
+	location /computers/ping {
+		access_log off;
+		include proxy_params;
+		proxy_redirect off;
+		proxy_pass http://csua_backend;
+	}
 	location ~ ^/~(.+?)(/.*)?$ {
 		alias /home/$1/public_html$2;
 		autoindex on;
@@ -18,38 +24,25 @@ server {
 		alias /webserver/CSUA-backend/media_root/;
 	}
 	location /static/ {
-		alias /webserver/csua-website/public/static/;
+		alias /webserver/CSUA-backend/static_root/;
 	}
-	location /newuser {
-		return 301 https://www.csua.berkeley.edu:8080$request_uri;
-	}
-	location /computers {
+	location = /favicon.ico {
+		root /webserver/CSUA-backend/static_root;
 		access_log off;
-		return 301 https://www.csua.berkeley.edu:8080$request_uri;
 	}
-	ssl_certificate /root/CERTS/acme.sh/csua.berkeley.edu/fullchain.cer;
-	ssl_certificate_key /root/CERTS/acme.sh/csua.berkeley.edu/csua.berkeley.edu.key;
-}
-
-server {
-	listen 8080 ssl;
-	server_name www.csua.berkeley.edu;
+	location = /robots.txt {
+		root /webserver/CSUA-backend/static_root;
+		access_log off;
+	}
 	location / {
 		include proxy_params;
 		proxy_redirect off;
 		proxy_pass http://csua_backend;
 	}
-	location /media/ {
-		alias /webserver/CSUA-backend/media_root/;
-	}
-	location /static/ {
-		alias /webserver/CSUA-backend/static_root/;
-	}
-	location /favicon.ico {
-		alias /webserver/CSUA-backend/static_root/;
-	}
 	ssl_certificate /root/CERTS/acme.sh/csua.berkeley.edu/fullchain.cer;
 	ssl_certificate_key /root/CERTS/acme.sh/csua.berkeley.edu/csua.berkeley.edu.key;
+	add_header Strict-Transport-Security "max-age=20480" always;
+	client_max_body_size 100M;
 }
 
 upstream csua_backend {
