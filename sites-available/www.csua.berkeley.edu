@@ -9,6 +9,8 @@ server {
 	listen 443 ssl;
 	server_name www.csua.berkeley.edu;
 	error_page 404 /404.html;
+	access_log /var/log/nginx/csua_backend_access.log;
+	error_log /var/log/nginx/csua_backend_error.log;
 
 	location /computers/ping {
 		access_log off;
@@ -18,7 +20,7 @@ server {
 	}
 	location ~ ^/~(.+?)(/.*)?$ {
 		alias /home/$1/public_html$2;
-		autoindex on;
+		autoindex off;
 	}
 	location /media/ {
 		alias /webserver/CSUA-backend/media_root/;
@@ -29,6 +31,10 @@ server {
 	location = /favicon.ico {
 		root /webserver/CSUA-backend/static_root;
 		access_log off;
+	}
+	location = /pnunez.gif {
+		empty_gif;
+		access_log /var/log/nginx/pnunez_gif.log;
 	}
 	location = /robots.txt {
 		root /webserver/CSUA-backend/static_root;
