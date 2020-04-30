@@ -1,0 +1,39 @@
+# Nginx config for CSUA
+server {
+	listen 80;
+	server_name archive.csua.berkeley.edu;
+	return 301 https://archive.csua.berkeley.edu$request_uri;
+	access_log off;
+}
+server {
+	listen 443 ssl;
+	server_name archive.csua.berkeley.edu;
+	error_page 404 /404.html;
+	access_log /var/log/nginx/csua_archive_access.log;
+	error_log /var/log/nginx/csua_archive_error.log;
+
+	location ~ ^/~(.+?)(/.*)?$ {
+		alias /home/$1/public_html$2;
+		autoindex off;
+	}
+	location ~ /\.git {
+		deny all;
+	}
+	location / {
+		root /var/www/archive;
+		autoindex on;
+	}
+	location = /favicon.ico {
+		root /webserver/CSUA-backend/static_root;
+		access_log off;
+	}
+	location = /robots.txt {
+		root /webserver/CSUA-backend/static_root;
+		access_log off;
+	}
+    ssl_certificate /etc/letsencrypt/live/www.csua.berkeley.edu-0001/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/www.csua.berkeley.edu-0001/privkey.pem; # managed by Certbot
+	add_header Strict-Transport-Security "max-age=20480" always;
+	client_max_body_size 100M;
+
+}

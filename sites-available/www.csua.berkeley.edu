@@ -45,10 +45,11 @@ server {
 		proxy_redirect off;
 		proxy_pass http://csua_backend;
 	}
-	ssl_certificate /root/CERTS/acme.sh/csua.berkeley.edu/fullchain.cer;
-	ssl_certificate_key /root/CERTS/acme.sh/csua.berkeley.edu/csua.berkeley.edu.key;
+    ssl_certificate /etc/letsencrypt/live/www.csua.berkeley.edu-0001/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/www.csua.berkeley.edu-0001/privkey.pem; # managed by Certbot
 	add_header Strict-Transport-Security "max-age=20480" always;
 	client_max_body_size 100M;
+
 }
 
 upstream csua_backend {
