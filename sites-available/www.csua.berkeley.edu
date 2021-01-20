@@ -19,17 +19,18 @@ server {
 		proxy_pass http://csua_backend;
 	}
 	location ~ ^/~(.+?)(/.*)?$ {
-		alias /home/$1/public_html$2;
+		# Homedirs
+		alias /csua/public_html/$1$2;
 		autoindex off;
 	}
 	location /media/ {
-		alias /webserver/CSUA-backend/media_root/;
+		alias /webserver/csua-backend/media_root/;
 	}
 	location /static/ {
-		alias /webserver/CSUA-backend/static_root/;
+		alias /webserver/csua-backend/static_root/;
 	}
 	location = /favicon.ico {
-		root /webserver/CSUA-backend/static_root;
+		root /webserver/csua-backend/static_root;
 		access_log off;
 	}
 	location = /pnunez.gif {
@@ -37,7 +38,7 @@ server {
 		access_log /var/log/nginx/pnunez_gif.log;
 	}
 	location = /robots.txt {
-		root /webserver/CSUA-backend/static_root;
+		root /webserver/csua-backend/static_root;
 		access_log off;
 	}
 	location / {
@@ -54,8 +55,4 @@ server {
 
 upstream csua_backend {
 	server localhost:3001;
-}
-
-upstream csua_website {
-	server localhost:3000;
 }

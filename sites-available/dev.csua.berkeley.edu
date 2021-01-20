@@ -9,7 +9,7 @@ server {
 	listen 443 ssl;
 	server_name dev.csua.berkeley.edu;
 	location / {
-		proxy_pass http://csua_backend_dev;
+		proxy_pass http://latte.csua.berkeley.edu;
 		proxy_http_version 1.1;
 
 		proxy_set_header Upgrade $http_upgrade;
@@ -23,17 +23,7 @@ server {
 
 		proxy_redirect off;
 	}
-	location /media/ {
-		alias /webserver/CSUA-backend/media_root/;
-	}
-	location /static/ {
-		alias /webserver/CSUA-backend-dev/static_root/;
-	}
     ssl_certificate /etc/letsencrypt/live/www.csua.berkeley.edu-0001/fullchain.pem; # managed by Certbot
     ssl_certificate_key /etc/letsencrypt/live/www.csua.berkeley.edu-0001/privkey.pem;
  # managed by Certbot
-}
-
-upstream csua_backend_dev {
-	server localhost:3002 fail_timeout=0;
 }
