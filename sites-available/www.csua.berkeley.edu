@@ -20,7 +20,7 @@ server {
 	}
 	location ~ ^/~(.+?)(/.*)?$ {
 		# Homedirs
-		alias /csua/public_html/$1$2;
+		alias /nfs/homes/$1/public_html$2;
 		autoindex off;
 	}
 	location /media/ {

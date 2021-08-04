@@ -1,5 +1,13 @@
 # Nginx config for CSUA
 server {
+	listen               80;
+	listen               443 ssl;
+	server_name          www.csua.org;
+	ssl_certificate /etc/letsencrypt/live/www.csua.berkeley.edu-0001/fullchain.pem; # managed by Certbot
+	ssl_certificate_key /etc/letsencrypt/live/www.csua.berkeley.edu-0001/privkey.pem; # managed by Certbot
+	return 301 https://csua.org$request_uri;
+}
+server {
 	listen 80;
 	server_name csua.org;
 	access_log off;
